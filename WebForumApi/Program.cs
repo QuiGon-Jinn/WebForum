@@ -1,4 +1,8 @@
 
+using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
+using WebForumApi.Database;
+
 namespace WebForumApi
 {
     public class Program
@@ -14,6 +18,12 @@ namespace WebForumApi
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
 
+            builder.Services.AddDbContext<UsersDbContext>(options => options.UseInMemoryDatabase("UsersDb"));
+
+            builder.Services.AddAuthorization();
+
+            builder.Services.AddIdentityApiEndpoints<IdentityUser>().AddEntityFrameworkStores<UsersDbContext>();
+
             var app = builder.Build();
 
             // Configure the HTTP request pipeline.
@@ -25,10 +35,12 @@ namespace WebForumApi
 
             app.UseHttpsRedirection();
 
+            app.UseAuthentication();
             app.UseAuthorization();
 
-
             app.MapControllers();
+
+            app.MapIdentityApi<IdentityUser>();
 
             app.Run();
         }
