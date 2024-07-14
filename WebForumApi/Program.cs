@@ -42,7 +42,7 @@ namespace WebForumApi
                                     Id="Bearer"
                                 }
                             },
-                            new string[]{}
+                            Array.Empty<string>()
                         }
                     });
                 }
@@ -52,7 +52,7 @@ namespace WebForumApi
             builder.Services.AddIdentityApiEndpoints<IdentityUser>().AddRoles<IdentityRole>().AddEntityFrameworkStores<UsersDbContext>();
             builder.Services.AddAuthorization();
 
-            builder.Services.AddDbContext<ForumDbContext>(options => options.UseSqlite("DataSource = forumDb; Cache=Shared"));
+            builder.Services.AddDbContext<ForumDbContext>(options => options.UseSqlite("DataSource = forumDb2; Cache=Shared"));
             builder.Services.AddScoped<ForumRepo>();
 
             var app = builder.Build();
@@ -96,8 +96,10 @@ namespace WebForumApi
 
                 if(await userManager.FindByNameAsync(adminUsername) == null)
                 {
-                    var adminUser = new IdentityUser(adminUsername);
-                    adminUser.Email = adminUsername;                    
+                    var adminUser = new IdentityUser(adminUsername)
+                    {
+                        Email = adminUsername
+                    };
                     await userManager.CreateAsync(adminUser, adminPassword);
                     await userManager.AddToRoleAsync(adminUser, "Moderator");
                 }

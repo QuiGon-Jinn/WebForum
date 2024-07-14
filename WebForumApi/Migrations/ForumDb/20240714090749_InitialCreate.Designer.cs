@@ -11,7 +11,7 @@ using WebForumApi.Database;
 namespace WebForumApi.Migrations.ForumDb
 {
     [DbContext(typeof(ForumDbContext))]
-    [Migration("20240714044717_InitialCreate")]
+    [Migration("20240714090749_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -33,7 +33,7 @@ namespace WebForumApi.Migrations.ForumDb
                         .IsRequired()
                         .HasColumnType("TEXT");
 
-                    b.Property<Guid?>("PostId")
+                    b.Property<Guid?>("ParentPostId")
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Tags")
@@ -48,16 +48,19 @@ namespace WebForumApi.Migrations.ForumDb
 
                     b.HasKey("Id");
 
-                    b.HasIndex("PostId");
+                    b.HasIndex("ParentPostId");
 
                     b.ToTable("Posts");
                 });
 
             modelBuilder.Entity("WebForumApi.Database.Models.Post", b =>
                 {
-                    b.HasOne("WebForumApi.Database.Models.Post", null)
+                    b.HasOne("WebForumApi.Database.Models.Post", "ParentPost")
                         .WithMany("Comments")
-                        .HasForeignKey("PostId");
+                        .HasForeignKey("ParentPostId")
+                        .OnDelete(DeleteBehavior.Cascade);
+
+                    b.Navigation("ParentPost");
                 });
 
             modelBuilder.Entity("WebForumApi.Database.Models.Post", b =>

@@ -21,22 +21,23 @@ namespace WebForumApi.Migrations.ForumDb
                     Text = table.Column<string>(type: "TEXT", nullable: true),
                     Likes = table.Column<string>(type: "TEXT", nullable: false),
                     Tags = table.Column<string>(type: "TEXT", nullable: false),
-                    PostId = table.Column<Guid>(type: "TEXT", nullable: true)
+                    ParentPostId = table.Column<Guid>(type: "TEXT", nullable: true)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Posts", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Posts_Posts_PostId",
-                        column: x => x.PostId,
+                        name: "FK_Posts_Posts_ParentPostId",
+                        column: x => x.ParentPostId,
                         principalTable: "Posts",
-                        principalColumn: "Id");
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateIndex(
-                name: "IX_Posts_PostId",
+                name: "IX_Posts_ParentPostId",
                 table: "Posts",
-                column: "PostId");
+                column: "ParentPostId");
         }
 
         /// <inheritdoc />

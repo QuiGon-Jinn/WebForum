@@ -5,8 +5,7 @@ using Microsoft.EntityFrameworkCore.ChangeTracking;
 
 namespace WebForumApi.Database
 {
-    public class UsersDbContext : IdentityDbContext<IdentityUser>
+    public class UsersDbContext(DbContextOptions<UsersDbContext> options) : IdentityDbContext<IdentityUser>(options)
     {
-        public UsersDbContext(DbContextOptions<UsersDbContext> options) : base(options) { }
     }
 }

@@ -1,12 +1,18 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using WebForumApi.Database.Configurations;
 using WebForumApi.Database.Models;
 
 namespace WebForumApi.Database
 {
-    public class ForumDbContext :DbContext
+    public class ForumDbContext(DbContextOptions<ForumDbContext> options) : DbContext(options)
     {
         public DbSet<Post> Posts { get; set; }
 
-        public ForumDbContext(DbContextOptions<ForumDbContext> options) : base(options) { }
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            base.OnModelCreating(modelBuilder);
+
+            modelBuilder.ApplyConfiguration(new PostConfiguration());
+        }
     }
 }
