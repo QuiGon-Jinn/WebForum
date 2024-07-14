@@ -48,14 +48,12 @@ namespace WebForumApi
                 }
             );
 
-            //builder.Services.AddDbContext<UsersDbContext>(options => options.UseInMemoryDatabase("UsersDb"));
             builder.Services.AddDbContext<UsersDbContext>(options => options.UseSqlite("DataSource = identityDb; Cache=Shared"));
-
-            //builder.Services.AddIdentityCore<IdentityUser>().AddEntityFrameworkStores<UsersDbContext>().AddApiEndpoints();
             builder.Services.AddIdentityApiEndpoints<IdentityUser>().AddRoles<IdentityRole>().AddEntityFrameworkStores<UsersDbContext>();
-            //builder.Services.AddScoped<UserManager<IdentityUser>, CustomUserManager<IdentityUser>>();
+            builder.Services.AddAuthorization();
 
-            builder.Services.AddAuthorization();            
+            builder.Services.AddDbContext<ForumDbContext>(options => options.UseSqlite("DataSource = forumDb; Cache=Shared"));
+            builder.Services.AddScoped<ForumRepo>();
 
             var app = builder.Build();
 
