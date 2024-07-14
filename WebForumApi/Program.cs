@@ -1,13 +1,14 @@
 
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.OpenApi.Models;
 using WebForumApi.Database;
 
 namespace WebForumApi
 {
     public class Program
     {
-        public static void Main(string[] args)
+        public static async Task Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
 
@@ -16,13 +17,45 @@ namespace WebForumApi
             builder.Services.AddControllers();
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
-            builder.Services.AddSwaggerGen();
+            builder.Services.AddSwaggerGen(
+                opt =>
+                {
+                    opt.SwaggerDoc("v1", new OpenApiInfo { Title = "MyAPI", Version = "v1" });
+                    opt.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+                    {
+                        In = ParameterLocation.Header,
+                        Description = "Please enter token",
+                        Name = "Authorization",
+                        Type = SecuritySchemeType.Http,
+                        BearerFormat = "JWT",
+                        Scheme = "bearer"
+                    });
 
-            builder.Services.AddDbContext<UsersDbContext>(options => options.UseInMemoryDatabase("UsersDb"));
+                    opt.AddSecurityRequirement(new OpenApiSecurityRequirement
+                    {
+                        {
+                            new OpenApiSecurityScheme
+                            {
+                                Reference = new OpenApiReference
+                                {
+                                    Type=ReferenceType.SecurityScheme,
+                                    Id="Bearer"
+                                }
+                            },
+                            new string[]{}
+                        }
+                    });
+                }
+            );
 
-            builder.Services.AddAuthorization();
+            //builder.Services.AddDbContext<UsersDbContext>(options => options.UseInMemoryDatabase("UsersDb"));
+            builder.Services.AddDbContext<UsersDbContext>(options => options.UseSqlite("DataSource = identityDb; Cache=Shared"));
 
-            builder.Services.AddIdentityApiEndpoints<IdentityUser>().AddEntityFrameworkStores<UsersDbContext>();
+            //builder.Services.AddIdentityCore<IdentityUser>().AddEntityFrameworkStores<UsersDbContext>().AddApiEndpoints();
+            builder.Services.AddIdentityApiEndpoints<IdentityUser>().AddRoles<IdentityRole>().AddEntityFrameworkStores<UsersDbContext>();
+            //builder.Services.AddScoped<UserManager<IdentityUser>, CustomUserManager<IdentityUser>>();
+
+            builder.Services.AddAuthorization();            
 
             var app = builder.Build();
 
@@ -31,6 +64,7 @@ namespace WebForumApi
             {
                 app.UseSwagger();
                 app.UseSwaggerUI();
+                //app.ApplyMigrations();
             }
 
             app.UseHttpsRedirection();
@@ -40,7 +74,36 @@ namespace WebForumApi
 
             app.MapControllers();
 
-            app.MapIdentityApi<IdentityUser>();
+            app.MapGroup("/identity").MapIdentityApi<IdentityUser>();
+
+            using (var scope = app.Services.CreateScope()) 
+            {
+                var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
+                var roles = new[] {"Moderator", "User"};
+                foreach (var role in roles)
+                {
+                    if(!await roleManager.RoleExistsAsync(role))
+                    {
+                        await roleManager.CreateAsync(new IdentityRole(role));
+                    }
+                }
+            }
+
+            using (var scope = app.Services.CreateScope())
+            {
+                var userManager = scope.ServiceProvider.GetRequiredService<UserManager<IdentityUser>>();
+
+                string adminUsername = "admin@webforum.com";
+                string adminPassword ="P@ssw0rd";
+
+                if(await userManager.FindByNameAsync(adminUsername) == null)
+                {
+                    var adminUser = new IdentityUser(adminUsername);
+                    adminUser.Email = adminUsername;                    
+                    await userManager.CreateAsync(adminUser, adminPassword);
+                    await userManager.AddToRoleAsync(adminUser, "Moderator");
+                }
+            }
 
             app.Run();
         }
