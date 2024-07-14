@@ -19,6 +19,24 @@ namespace WebForumApi.Controllers
             _forumRepo = forumRepo;
         }
 
+        [Route("ViewPosts")]
+        [HttpGet]
+        [ProducesResponseType(typeof(Post), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(string), (int)HttpStatusCode.NotFound)]
+        [ProducesResponseType(typeof(string), (int)HttpStatusCode.BadRequest)]
+        public async Task<ActionResult<Post>> ViewPosts()
+        {
+            try
+            {
+                var result = await _forumRepo.Get();
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.ToString());
+            }
+        }
+
         [Route("CreatePost")]
         [HttpPost]
         [Authorize]
