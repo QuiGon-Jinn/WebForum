@@ -9,10 +9,38 @@ namespace WebForumApi.Database
     {
         private readonly ForumDbContext db = context;
 
-        public async Task<List<Post>?> Get()
+        public async Task<List<Post>?> Get(DateTime fromDate, DateTime toDate, string author, string orderBy, int? page = null, int? pageSize = null)
         {
             var posts = await db.Posts.ToListAsync();
-            return posts.FindAll(x => x.ParentPost == null); 
+            posts = posts.FindAll(x => x.ParentPost == null && x.CreatedDate >= fromDate && x.CreatedDate < toDate);
+
+            if (!string.IsNullOrEmpty(author))
+            {
+                posts = posts.FindAll(x => (x.User ?? "").Equals(author, StringComparison.InvariantCultureIgnoreCase));
+            }
+
+            if (!string.IsNullOrEmpty(orderBy))
+            {
+                var orderByArgs = orderBy.Split(' ', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries);
+
+                var propertyInfo = typeof(Post).GetProperty(orderByArgs[0], BindingFlags.IgnoreCase | BindingFlags.Public | BindingFlags.Instance);
+                if (propertyInfo != null)
+                {
+                    if (orderByArgs.Length > 1 && orderByArgs[1].Contains("desc", StringComparison.InvariantCultureIgnoreCase))
+                    {
+                        posts = [.. posts.OrderByDescending(x => propertyInfo.GetValue(x))];
+                    }
+                    else
+                    {
+                        posts = [.. posts.OrderBy(x => propertyInfo.GetValue(x))];
+                    }
+                }
+            }
+
+            if (page != null && pageSize != null)
+                posts = [.. posts.Skip(((page ?? 0) - 1) * (pageSize ?? 0)).Take(pageSize ?? 0)];
+
+            return posts; 
         }
 
         public async Task<Post> Add(string user, string text)

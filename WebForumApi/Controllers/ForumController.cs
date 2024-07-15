@@ -19,11 +19,20 @@ namespace WebForumApi.Controllers
         [ProducesResponseType(typeof(List<Post>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(string), (int)HttpStatusCode.NotFound)]
         [ProducesResponseType(typeof(string), (int)HttpStatusCode.BadRequest)]
-        public async Task<ActionResult<List<Post>>> ViewPosts()
+        public async Task<ActionResult<List<Post>>> ViewPosts([FromQuery] ViewRequestModel viewRequestModel)
         {
             try
             {
-                var result = await _forumRepo.Get();
+                var result = await _forumRepo.Get
+                (
+                    viewRequestModel.FromDate, 
+                    viewRequestModel.ToDate, 
+                    viewRequestModel.Author ?? "", 
+                    viewRequestModel.OrderBy ?? "", 
+                    viewRequestModel.PageNo, 
+                    viewRequestModel.PageSize
+                );
+
                 return Ok(result);
             }
             catch (Exception ex)
