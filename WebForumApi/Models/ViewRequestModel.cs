@@ -25,6 +25,11 @@ namespace WebForumApi.Models
         public string? User { get; set; }
 
         /// <summary>
+        /// Filter on this Tag
+        /// </summary>  
+        public string? Tag { get; set; }
+
+        /// <summary>
         /// Example: "CommentsCount desc" or "user"
         /// </summary>
         public string? OrderBy { get; set; }

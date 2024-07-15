@@ -36,6 +36,7 @@ namespace WebForumApi.Controllers
                     viewRequestModel.FromDate, 
                     viewRequestModel.ToDate, 
                     viewRequestModel.User ?? "", 
+                    viewRequestModel.Tag ?? "",
                     viewRequestModel.OrderBy ?? "", 
                     viewRequestModel.PageNo, 
                     viewRequestModel.PageSize

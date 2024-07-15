@@ -9,7 +9,7 @@ namespace WebForumApi.Database
     {
         private readonly ForumDbContext db = context;
 
-        public async Task<List<Post>?> Get(DateTime fromDate, DateTime toDate, string user, string orderBy, 
+        public async Task<List<Post>?> Get(DateTime fromDate, DateTime toDate, string user, string tag, string orderBy, 
             int? page = null, int? pageSize = null)
         {
             var posts = await db.Posts.ToListAsync();
@@ -18,6 +18,11 @@ namespace WebForumApi.Database
             if (!string.IsNullOrEmpty(user))
             {
                 posts = posts.FindAll(x => (x.User ?? "").Contains(user, StringComparison.InvariantCultureIgnoreCase));
+            }
+
+            if (!string.IsNullOrEmpty(tag))
+            {
+                posts = posts.FindAll(x => x.Tags.Contains(tag, StringComparer.OrdinalIgnoreCase));
             }
 
             if (!string.IsNullOrEmpty(orderBy))
