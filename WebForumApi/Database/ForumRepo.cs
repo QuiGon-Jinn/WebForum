@@ -12,18 +12,14 @@ namespace WebForumApi.Database
         public async Task<List<Post>?> Get(DateTime fromDate, DateTime toDate, string user, string tag, string orderBy, 
             int? page = null, int? pageSize = null)
         {
-            var posts = await db.Posts.ToListAsync();
-            posts = posts.FindAll(x => x.ParentPost == null && x.CreatedDate >= fromDate && x.CreatedDate < toDate);
+            var posts = db.Posts.Where(x => x.ParentPostId != null 
+                || x.ParentPostId == null && x.CreatedDate >= fromDate && x.CreatedDate < toDate
+                && (string.IsNullOrEmpty(user) || EF.Functions.Like((x.User ?? ""), $"%{user}%"))
+                //&& (string.IsNullOrEmpty(tag) || x.Tags.Contains(tag))
+            );
 
-            if (!string.IsNullOrEmpty(user))
-            {
-                posts = posts.FindAll(x => (x.User ?? "").Contains(user, StringComparison.InvariantCultureIgnoreCase));
-            }
-
-            if (!string.IsNullOrEmpty(tag))
-            {
-                posts = posts.FindAll(x => x.Tags.Contains(tag, StringComparer.OrdinalIgnoreCase));
-            }
+            var result = (await posts.ToListAsync()).FindAll(x => x.ParentPostId == null 
+                && (string.IsNullOrEmpty(tag) || x.Tags.Contains(tag, StringComparer.OrdinalIgnoreCase)));
 
             if (!string.IsNullOrEmpty(orderBy))
             {
@@ -34,19 +30,21 @@ namespace WebForumApi.Database
                 {
                     if (orderByArgs.Length > 1 && orderByArgs[1].Contains("desc", StringComparison.InvariantCultureIgnoreCase))
                     {
-                        posts = [.. posts.OrderByDescending(x => propertyInfo.GetValue(x))];
+                        result = [.. result.OrderByDescending(x => propertyInfo.GetValue(x))];
                     }
                     else
                     {
-                        posts = [.. posts.OrderBy(x => propertyInfo.GetValue(x))];
+                        result = [.. result.OrderBy(x => propertyInfo.GetValue(x))];
                     }
                 }
             }
 
             if (page != null && pageSize != null)
-                posts = [.. posts.Skip(((page ?? 0) - 1) * (pageSize ?? 0)).Take(pageSize ?? 0)];
+            {
+                result = [.. result.Skip(((page ?? 0) - 1) * (pageSize ?? 0)).Take(pageSize ?? 0)];
+            }
 
-            return posts; 
+            return result; 
         }
 
         public async Task<Post> Add(string user, string text)
