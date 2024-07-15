@@ -9,14 +9,15 @@ namespace WebForumApi.Database
     {
         private readonly ForumDbContext db = context;
 
-        public async Task<List<Post>?> Get(DateTime fromDate, DateTime toDate, string author, string orderBy, int? page = null, int? pageSize = null)
+        public async Task<List<Post>?> Get(DateTime fromDate, DateTime toDate, string user, string orderBy, 
+            int? page = null, int? pageSize = null)
         {
             var posts = await db.Posts.ToListAsync();
             posts = posts.FindAll(x => x.ParentPost == null && x.CreatedDate >= fromDate && x.CreatedDate < toDate);
 
-            if (!string.IsNullOrEmpty(author))
+            if (!string.IsNullOrEmpty(user))
             {
-                posts = posts.FindAll(x => (x.User ?? "").Equals(author, StringComparison.InvariantCultureIgnoreCase));
+                posts = posts.FindAll(x => (x.User ?? "").Equals(user, StringComparison.InvariantCultureIgnoreCase));
             }
 
             if (!string.IsNullOrEmpty(orderBy))

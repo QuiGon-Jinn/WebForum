@@ -1,7 +1,11 @@
 
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 using Microsoft.OpenApi.Models;
+using Swashbuckle.AspNetCore.SwaggerGen;
+using System.Reflection;
+using System.Xml.XPath;
 using WebForumApi.Database;
 
 namespace WebForumApi
@@ -45,6 +49,9 @@ namespace WebForumApi
                             Array.Empty<string>()
                         }
                     });
+
+                    var xmlFilename = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+                    opt.IncludeXmlComments(Path.Combine(AppContext.BaseDirectory, xmlFilename));
                 }
             );
 

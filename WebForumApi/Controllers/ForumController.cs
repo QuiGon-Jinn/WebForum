@@ -8,12 +8,20 @@ using WebForumApi.Models;
 
 namespace WebForumApi.Controllers
 {
+    /// <summary>
+    /// Forum
+    /// </summary>
     [Route("api/[controller]")]
     [ApiController]
     public class ForumController(ForumRepo forumRepo) : ControllerBase
     {
         private readonly ForumRepo _forumRepo = forumRepo;
-
+        
+        /// <summary>
+        /// Anyone can view posts
+        /// </summary>
+        /// <param name="viewRequestModel">Posts can be filtered</param>
+        /// <returns>Posts matching specified filters</returns>
         [Route("ViewPosts")]
         [HttpGet]
         [ProducesResponseType(typeof(List<Post>), (int)HttpStatusCode.OK)]
@@ -27,7 +35,7 @@ namespace WebForumApi.Controllers
                 (
                     viewRequestModel.FromDate, 
                     viewRequestModel.ToDate, 
-                    viewRequestModel.Author ?? "", 
+                    viewRequestModel.User ?? "", 
                     viewRequestModel.OrderBy ?? "", 
                     viewRequestModel.PageNo, 
                     viewRequestModel.PageSize
@@ -41,6 +49,11 @@ namespace WebForumApi.Controllers
             }
         }
 
+        /// <summary>
+        /// Create a new post. You must be logged in for this.
+        /// </summary>
+        /// <param name="postRequest"></param>
+        /// <returns>The post just created</returns>
         [Route("CreatePost")]
         [HttpPost]
         [Authorize]
@@ -68,6 +81,11 @@ namespace WebForumApi.Controllers
             }
         }
 
+        /// <summary>
+        /// Logged in users can comment on any post, including other comments.
+        /// </summary>
+        /// <param name="commentRequest">Specify the id of the post/comment you want to comment on and supply the comment</param>
+        /// <returns>The comment just created</returns>
         [Route("Comment")]
         [HttpPost]
         [Authorize]
@@ -99,6 +117,10 @@ namespace WebForumApi.Controllers
             }
         }
 
+        /// <summary>
+        /// Loggend in users can like other people's posts and comments
+        /// </summary>
+        /// <param name="likeRequest">Specify the id of the post/comment you want to like</param>
         [Route("Like")]
         [HttpPost]
         [Authorize]
@@ -134,6 +156,10 @@ namespace WebForumApi.Controllers
             }
         }
 
+        /// <summary>
+        /// Loggend in users can remove a like they've made
+        /// </summary>
+        /// <param name="likeRequest">Specify the id of the post/comment you want to remove your like from</param>
         [Route("RemoveLike")]
         [HttpPost]
         [Authorize]
@@ -169,6 +195,11 @@ namespace WebForumApi.Controllers
             }
         }
 
+        /// <summary>
+        /// Moderators can tag a post or comment
+        /// </summary>
+        /// <param name="tagRequest">Specify the id of the post/comment you want to tag as well as the text you'd like to tag it with 
+        /// (example: “misleading or false information”</param>
         [Route("Tag")]
         [HttpPost]
         [Authorize(Roles = "Moderator")]
