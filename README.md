@@ -6,6 +6,9 @@
 3. dotnet ef migrations add InitialCreate -c ForumDbContext
 4. dotnet ef database update -c ForumDbContext
 
+### Documentation:
+Run in visual studio to open SwaggerUI.
+
 ### Postman: 
 [Postman url](https://api.postman.com/collections/10754045-8effa15f-9708-4789-bda6-0a0e6d917fe5?access_key=PMAT-01J2TD9H6XMM3BN60TJPAZD2BX)
 > Feel free to fork collection to edit.
