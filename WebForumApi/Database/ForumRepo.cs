@@ -17,7 +17,7 @@ namespace WebForumApi.Database
 
             if (!string.IsNullOrEmpty(user))
             {
-                posts = posts.FindAll(x => (x.User ?? "").Equals(user, StringComparison.InvariantCultureIgnoreCase));
+                posts = posts.FindAll(x => (x.User ?? "").Contains(user, StringComparison.InvariantCultureIgnoreCase));
             }
 
             if (!string.IsNullOrEmpty(orderBy))
